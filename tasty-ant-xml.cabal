@@ -25,4 +25,4 @@ library
     transformers >= 0.3.0.0,
     xml >= 1.3.13
   default-language: Haskell98
-  ghc-options: -Wall -Werror -O2
+  ghc-options: -Wall -O2
