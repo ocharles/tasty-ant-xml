@@ -53,10 +53,14 @@ instance Monoid Summary where
 
 
 --------------------------------------------------------------------------------
--- To run tests using this ingredient, use 'Tasty.defaultMainWithIngredients',
--- passing 'antXMLRunner' as one possible ingredient. This ingredient will run
--- tests if you pass the @--xml@ command line option. For example,
--- @--xml=junit.xml@ will run all the tests and generate @junit.xml@ as output.
+{-|
+
+  To run tests using this ingredient, use 'Tasty.defaultMainWithIngredients',
+  passing 'antXMLRunner' as one possible ingredient. This ingredient will run
+  tests if you pass the @--xml@ command line option. For example,
+  @--xml=junit.xml@ will run all the tests and generate @junit.xml@ as output.
+
+-}
 antXMLRunner :: Tasty.Ingredient
 antXMLRunner = Tasty.TestReporter optionDescription runner
  where
