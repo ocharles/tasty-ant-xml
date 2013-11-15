@@ -2,6 +2,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
+-- | Run a 'Tasty.TestTree' and produce an XML file summarising the test results
+-- in the same schema that would be produced by Apache Ant's JUnit test runner.
+-- This schema can be intepreted by the Jenkins continuous integration server,
+-- amongst other tools.
 module Test.Tasty.Runners.AntXML (antXMLRunner) where
 
 import Control.Applicative
@@ -49,6 +53,10 @@ instance Monoid Summary where
 
 
 --------------------------------------------------------------------------------
+-- To run tests using this ingredient, use 'Tasty.defaultMainWithIngredients',
+-- passing 'antXMLRunner' as one possible ingredient. This ingredient will run
+-- tests if you pass the @--xml@ command line option. For example,
+-- @--xml=junit.xml@ will run all the tests and generate @junit.xml@ as output.
 antXMLRunner :: Tasty.Ingredient
 antXMLRunner = Tasty.TestReporter optionDescription runner
  where
