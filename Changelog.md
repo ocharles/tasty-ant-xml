@@ -1,3 +1,7 @@
+# 1.0.0.2
+
+* This version contains only changes to documentation.
+
 # 1.0.0.1
 
 * This version contains only changes to documentation.

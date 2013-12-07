@@ -1,6 +1,7 @@
 name: tasty-ant-xml
-version: 1.0.0.1
-synopsis: A tasty ingredient to output test results in XML, using the Ant schema. This XML can be consumed by the Jenkins continuous integration framework.
+version: 1.0.0.2
+synopsis: Render tasty output to XML for Jenkins
+description: A tasty ingredient to output test results in XML, using the Ant schema. This XML can be consumed by the Jenkins continuous integration framework.
 homepage: http://github.com/ocharles/tasty-ant-xml
 license: BSD3
 license-file: LICENSE
@@ -13,7 +14,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules: Test.Tasty.Runners.AntXML
-  build-depends: 
+  build-depends:
     base >= 4.5 && < 5,
     containers >= 0.5.0.0,
     generic-deriving >= 1.6.2,
