@@ -1,3 +1,7 @@
+# 1.0.0.3
+
+* Change the .cabal file to include Changelog.md in source distribution.
+
 # 1.0.0.2
 
 * This version contains only changes to documentation.
