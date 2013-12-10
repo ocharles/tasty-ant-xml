@@ -1,3 +1,7 @@
+# 1.0.0.4
+
+* Updated to build with `tasty` 0.5.
+
 # 1.0.0.3
 
 * Change the .cabal file to include Changelog.md in source distribution.
