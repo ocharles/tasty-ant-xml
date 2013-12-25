@@ -124,7 +124,10 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
       in do
         (Const summary, tests) <-
           flip State.runStateT 0 $ Functor.getCompose $ getTraversal $
-           Tasty.foldTestTree runTest runGroup (const id) options testTree
+           Tasty.foldTestTree
+             Tasty.trivialFold { Tasty.foldSingle = runTest, Tasty.foldGroup = runGroup }
+             options
+             testTree
 
         writeFile path $
           XML.showTopElement $
