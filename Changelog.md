@@ -1,3 +1,7 @@
+# 1.0.0.5
+
+* Updated to build with `tasty` 0.7
+
 # 1.0.0.4
 
 * Updated to build with `tasty` 0.5.
