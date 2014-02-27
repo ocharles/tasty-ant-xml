@@ -102,9 +102,6 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
                     (mkFailure (Tasty.resultDescription result))
                       { summaryFailures = Sum 1 }
 
-              Tasty.Exception e -> pure $
-                (mkFailure (show e)) { summaryErrors = Sum 1 }
-                             
               -- Otherwise the test has either not been started or is currently
               -- executing
               _ -> STM.retry
