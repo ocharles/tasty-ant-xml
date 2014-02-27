@@ -22,7 +22,7 @@ library
     reducers >= 3.10.1,
     stm >= 2.4.2,
     tagged >= 0.7,
-    tasty >= 0.7,
+    tasty >= 0.8,
     transformers >= 0.3.0.0,
     xml >= 1.3.13
   default-language: Haskell98
