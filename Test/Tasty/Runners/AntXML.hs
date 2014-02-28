@@ -98,13 +98,14 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
               -- If the test is done, generate XML for it
               Tasty.Done result
                 | Tasty.resultSuccessful result -> pure mkSuccess
-                | otherwise -> pure $
-                    (mkFailure (Tasty.resultDescription result))
-                      { summaryFailures = Sum 1 }
+                | otherwise -> case Tasty.resultException result of
+                    Just e  -> pure $ (mkFailure (show e)) { summaryErrors = Sum 1 }
+                    Nothing -> pure $
+                      if Tasty.resultTimedOut result
+                        then (mkFailure "TimeOut") { summaryErrors = Sum 1 }
+                        else (mkFailure (Tasty.resultDescription result))
+                             { summaryFailures = Sum 1 }
 
-              Tasty.Exception e -> pure $
-                (mkFailure (show e)) { summaryErrors = Sum 1 }
-                             
               -- Otherwise the test has either not been started or is currently
               -- executing
               _ -> STM.retry
