@@ -25,7 +25,6 @@ import qualified Control.Monad.State as State
 import qualified Data.Functor.Compose as Functor
 import qualified Data.IntMap as IntMap
 import qualified Test.Tasty.Options as Tasty
-import qualified Test.Tasty.Providers as Tasty
 import qualified Test.Tasty.Runners as Tasty
 import qualified Text.XML.Light as XML
 
