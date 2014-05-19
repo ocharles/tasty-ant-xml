@@ -1,3 +1,7 @@
+# 1.0.0.7
+
+* Relaxed lower bound on containers to build with GHC 7.4.
+
 # 1.0.0.6
 
 * Updated to build with `tasty` 0.8.
