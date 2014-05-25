@@ -1,3 +1,7 @@
+# 1.0.0.8
+
+* Enable `-XFlexibleContexts`, which is required to build with GHC 7.9.
+
 # 1.0.0.7
 
 * Relaxed lower bound on containers to build with GHC 7.4.
