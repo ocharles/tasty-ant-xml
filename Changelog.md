@@ -1,3 +1,7 @@
+# 1.0.0.9
+
+* Build with tasty < 0.10
+
 # 1.0.0.8
 
 * Enable `-XFlexibleContexts`, which is required to build with GHC 7.9.

@@ -2,7 +2,7 @@
 with import <nixpkgs> {};
 let
   inherit (haskellPackages) aeson ansiTerminal async attoparsec cabal
-    cabalInstall_1_18_0_2 deepseq doctest
+    cabalInstall deepseq doctest
     filepath genericDeriving HUnit lens logict mtl optparseApplicative
     reducers regexPosix
     semigroups
@@ -14,5 +14,5 @@ in cabal.mkDerivation (self: {
   version = "1.0.0";
   src = ./.;
   buildDepends = [ genericDeriving reducers tasty xml ];
-  buildTools = [ cabalInstall_1_18_0_2 ];
+  buildTools = [ cabalInstall ];
 })
