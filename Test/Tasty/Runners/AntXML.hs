@@ -7,7 +7,7 @@
 -- in the same schema that would be produced by Apache Ant's JUnit test runner.
 -- This schema can be intepreted by the Jenkins continuous integration server,
 -- amongst other tools.
-module Test.Tasty.Runners.AntXML (antXMLRunner) where
+module Test.Tasty.Runners.AntXML (antXMLRunner, AntXMLPath(..) ) where
 
 import Control.Applicative
 import Control.Arrow (first)
@@ -131,6 +131,8 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
              options
              testTree
 
+        return $ \elapsedTime -> do
+
         writeFile path $
           XML.showTopElement $
             appEndo (xmlRenderer summary) $
@@ -141,6 +143,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
                 , XML.Attr (XML.unqual "failures")
                     (show . getSum . summaryFailures $ summary)
                 , XML.Attr (XML.unqual "tests") (show tests)
+                , XML.Attr (XML.unqual "time") (show elapsedTime)
                 ]
 
         return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
