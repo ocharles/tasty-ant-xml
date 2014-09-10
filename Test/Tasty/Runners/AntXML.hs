@@ -133,20 +133,20 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
         return $ \elapsedTime -> do
 
-        writeFile path $
-          XML.showTopElement $
-            appEndo (xmlRenderer summary) $
-              XML.node
-                (XML.unqual "testsuites")
-                [ XML.Attr (XML.unqual "errors")
-                    (show . getSum . summaryErrors $ summary)
-                , XML.Attr (XML.unqual "failures")
-                    (show . getSum . summaryFailures $ summary)
-                , XML.Attr (XML.unqual "tests") (show tests)
-                , XML.Attr (XML.unqual "time") (show elapsedTime)
-                ]
+          writeFile path $
+            XML.showTopElement $
+              appEndo (xmlRenderer summary) $
+                XML.node
+                  (XML.unqual "testsuites")
+                  [ XML.Attr (XML.unqual "errors")
+                      (show . getSum . summaryErrors $ summary)
+                  , XML.Attr (XML.unqual "failures")
+                      (show . getSum . summaryFailures $ summary)
+                  , XML.Attr (XML.unqual "tests") (show tests)
+                  , XML.Attr (XML.unqual "time") (show elapsedTime)
+                  ]
 
-        return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
+          return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
 
   appendChild parent child =
     parent { XML.elContent = XML.elContent parent ++ [ XML.Elem child ] }
