@@ -15,7 +15,6 @@ import Control.Monad.Trans.Class (lift)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Monoid(..), Endo(..), Sum(..))
 import Data.Proxy (Proxy(..))
-import Data.Semigroup.Applicative (Traversal(..))
 import Data.Tagged (Tagged(..))
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
@@ -71,7 +70,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
     return $ \statusMap ->
       let
 
-        runTest _ testName _ = Traversal $ Functor.Compose $ do
+        runTest _ testName _ = Tasty.Traversal $ Functor.Compose $ do
           i <- State.get
 
           summary <- lift $ STM.atomically $ do
@@ -113,8 +112,8 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
           Const summary <$ State.modify (+ 1)
 
-        runGroup groupName children = Traversal $ Functor.Compose $ do
-          Const soFar <- Functor.getCompose $ getTraversal children
+        runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
+          Const soFar <- Functor.getCompose $ Tasty.getTraversal children
           let grouped = appEndo (xmlRenderer soFar) $
                 XML.node (XML.unqual "testsuite") $
                   XML.Attr (XML.unqual "name") groupName
@@ -125,7 +124,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
       in do
         (Const summary, tests) <-
-          flip State.runStateT 0 $ Functor.getCompose $ getTraversal $
+          flip State.runStateT 0 $ Functor.getCompose $ Tasty.getTraversal $
            Tasty.foldTestTree
              Tasty.trivialFold { Tasty.foldSingle = runTest, Tasty.foldGroup = runGroup }
              options
