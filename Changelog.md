@@ -1,3 +1,11 @@
+# 1.0.1
+
+* `tasty-ant-xml` now mentions timing information. Thanks @robdockins for this patch!
+
+# 1.0.0.11
+
+* Remove dependency on `reducers`. Thanks to @jdnavarro
+
 # 1.0.0.9
 
 * Build with tasty < 0.10

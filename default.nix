@@ -1,18 +1,18 @@
-{}:
-with import <nixpkgs> {};
-let
-  inherit (haskellPackages) aeson ansiTerminal async attoparsec cabal
-    cabalInstall deepseq doctest
-    filepath genericDeriving HUnit lens logict mtl optparseApplicative
-    reducers regexPosix
-    semigroups
-    simpleReflect snap stm tagged
-    text unorderedContainers utf8String vector xml tasty;
+{ cabal, genericDeriving, mtl, stm, tagged, tasty, transformers
+, xml
+}:
 
-in cabal.mkDerivation (self: {
+cabal.mkDerivation (self: {
   pname = "tasty-ant-xml";
-  version = "1.0.0";
+  version = "1.0.1";
   src = ./.;
-  buildDepends = [ genericDeriving reducers tasty xml ];
-  buildTools = [ cabalInstall ];
+  buildDepends = [
+    genericDeriving mtl stm tagged tasty transformers xml
+  ];
+  meta = {
+    homepage = "http://github.com/ocharles/tasty-ant-xml";
+    description = "Render tasty output to XML for Jenkins";
+    license = self.stdenv.lib.licenses.bsd3;
+    platforms = self.ghc.meta.platforms;
+  };
 })
