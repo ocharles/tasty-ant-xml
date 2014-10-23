@@ -9,6 +9,7 @@
 -- amongst other tools.
 module Test.Tasty.Runners.AntXML (antXMLRunner, AntXMLPath(..) ) where
 
+import Numeric (showFFloat)
 import Control.Applicative
 import Control.Arrow (first)
 import Control.Monad.Trans.Class (lift)
@@ -69,6 +70,8 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
     return $ \statusMap ->
       let
+        timeDigits = 3
+        showTime time = showFFloat (Just timeDigits) time ""
 
         runTest _ testName _ = Tasty.Traversal $ Functor.Compose $ do
           i <- State.get
@@ -78,32 +81,34 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
               fromMaybe (error "Attempted to lookup test by index outside bounds") $
                 IntMap.lookup i statusMap
 
-            let testCaseAttributes = map (uncurry XML.Attr . first XML.unqual)
-                  [ ("name", testName ) ]
+            let testCaseAttributes time = map (uncurry XML.Attr . first XML.unqual)
+                  [ ("name", testName)
+                  , ("time", showTime time)
+                  ]
 
                 mkSummary contents =
                   mempty { xmlRenderer = Endo
                              (`appendChild` XML.node (XML.unqual "testcase") contents)
                          }
 
-                mkSuccess = (mkSummary testCaseAttributes) { summarySuccesses = Sum 1 }
+                mkSuccess time = (mkSummary (testCaseAttributes time)) { summarySuccesses = Sum 1 }
 
-                mkFailure reason =
-                  mkSummary ( testCaseAttributes
+                mkFailure time reason =
+                  mkSummary ( testCaseAttributes time
                             , XML.node (XML.unqual "failure") reason
                             )
 
             case status of
               -- If the test is done, generate XML for it
               Tasty.Done result
-                | Tasty.resultSuccessful result -> pure mkSuccess
+                | Tasty.resultSuccessful result -> pure (mkSuccess (Tasty.resultTime result))
                 | otherwise ->
                     case resultException result of
-                      Just e  -> pure $ (mkFailure (show e)) { summaryErrors = Sum 1 }
+                      Just e  -> pure $ (mkFailure (Tasty.resultTime result) (show e)) { summaryErrors = Sum 1 }
                       Nothing -> pure $
                         if resultTimedOut result
-                          then (mkFailure "TimeOut") { summaryErrors = Sum 1 }
-                          else (mkFailure (Tasty.resultDescription result))
+                          then (mkFailure (Tasty.resultTime result) "TimeOut") { summaryErrors = Sum 1 }
+                          else (mkFailure (Tasty.resultTime result) (Tasty.resultDescription result))
                                { summaryFailures = Sum 1 }
 
               -- Otherwise the test has either not been started or is currently
@@ -142,7 +147,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
                   , XML.Attr (XML.unqual "failures")
                       (show . getSum . summaryFailures $ summary)
                   , XML.Attr (XML.unqual "tests") (show tests)
-                  , XML.Attr (XML.unqual "time") (show elapsedTime)
+                  , XML.Attr (XML.unqual "time") (showTime elapsedTime)
                   ]
 
           return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
