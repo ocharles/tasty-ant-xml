@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "tasty-ant-xml";
-  version = "1.0.1";
+  version = "1.0.2";
   src = ./.;
   buildDepends = [
     base containers generic-deriving ghc-prim mtl stm tagged tasty

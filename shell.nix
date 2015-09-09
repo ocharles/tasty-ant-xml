@@ -1,20 +1,19 @@
-let
-  pkgs = import <nixpkgs> {};
-  haskellPackages = pkgs.haskellPackages.override {
-    extension = self: super: {
-      tastyAntXml = self.callPackage ./. {};
-    };
-  };
-
-in pkgs.myEnvFun {
-     name = haskellPackages.tastyAntXml.name;
-     buildInputs = [
-       pkgs.curl
-       pkgs.git
-       pkgs.openssh
-       (haskellPackages.ghcWithPackages (hs: ([
-         hs.cabalInstall
-         hs.hscolour
-       ] ++ hs.tastyAntXml.propagatedNativeBuildInputs)))
-     ];
-   }
+with (import <nixpkgs> {}).pkgs;
+let pkg = haskellngPackages.callPackage
+            ({ mkDerivation, base, containers, generic-deriving, ghc-prim, mtl
+             , stdenv, stm, tagged, tasty, transformers, xml
+             }:
+             mkDerivation {
+               pname = "tasty-ant-xml";
+               version = "1.0.2";
+               src = ./.;
+               buildDepends = [
+                 base containers generic-deriving ghc-prim mtl stm tagged tasty
+                 transformers xml
+               ];
+               homepage = "http://github.com/ocharles/tasty-ant-xml";
+               description = "Render tasty output to XML for Jenkins";
+               license = stdenv.lib.licenses.bsd3;
+             }) {};
+in
+  pkg.env
