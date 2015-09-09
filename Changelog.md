@@ -1,3 +1,7 @@
+# 1.0.2
+
+* Build with tasty < 0.12.
+
 # 1.0.1
 
 * `tasty-ant-xml` now mentions timing information. Thanks @robdockins for this patch!
