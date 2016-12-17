@@ -20,6 +20,8 @@ import Data.Tagged (Tagged(..))
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Generics.Deriving.Monoid (memptydefault, mappenddefault)
+import System.Directory (createDirectoryIfMissing, canonicalizePath)
+import System.FilePath (takeDirectory)
 
 import qualified Control.Concurrent.STM as STM
 import qualified Control.Monad.State as State
@@ -136,7 +138,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
              testTree
 
         return $ \elapsedTime -> do
-
+          createPathDirIfMissing path
           writeFile path $
             XML.showTopElement $
               appEndo (xmlRenderer summary) $
@@ -164,3 +166,6 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
     case Tasty.resultOutcome r of
          Tasty.Failure (Tasty.TestTimedOut _) -> True
          _ -> False
+
+  createPathDirIfMissing path = fmap takeDirectory (canonicalizePath path)
+                                >>= createDirectoryIfMissing True
