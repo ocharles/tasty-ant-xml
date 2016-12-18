@@ -1,3 +1,7 @@
+# 1.0.3
+
+* Now creates the directory containing the report XML file. Thanks to @haishengwu-okta for this feature.
+
 # 1.0.2
 
 * Build with tasty < 0.12.
