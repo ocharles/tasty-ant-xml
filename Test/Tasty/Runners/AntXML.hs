@@ -12,7 +12,7 @@ module Test.Tasty.Runners.AntXML (antXMLRunner, AntXMLPath(..) ) where
 import Numeric (showFFloat)
 import Control.Applicative
 import Control.Arrow (first)
-import Control.Monad.Trans.Class (lift)
+import Control.Monad.IO.Class (liftIO)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Monoid(..), Endo(..), Sum(..))
 import Data.Proxy (Proxy(..))
@@ -25,8 +25,11 @@ import System.FilePath (takeDirectory)
 
 import qualified Control.Concurrent.STM as STM
 import qualified Control.Monad.State as State
+import qualified Control.Monad.Reader as Reader
 import qualified Data.Functor.Compose as Functor
 import qualified Data.IntMap as IntMap
+import qualified Test.Tasty as Tasty
+import qualified Test.Tasty.Providers as Tasty
 import qualified Test.Tasty.Options as Tasty
 import qualified Test.Tasty.Runners as Tasty
 import qualified Text.XML.Light as XML
@@ -75,10 +78,16 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
         timeDigits = 3
         showTime time = showFFloat (Just timeDigits) time ""
 
+        runTest :: (Tasty.IsTest t)
+                => Tasty.OptionSet
+                -> Tasty.TestName
+                -> t
+                -> Tasty.Traversal (Functor.Compose (Reader.ReaderT [String] (State.StateT IntMap.Key IO)) (Const Summary))
         runTest _ testName _ = Tasty.Traversal $ Functor.Compose $ do
           i <- State.get
+          groupNames <- Reader.ask
 
-          summary <- lift $ STM.atomically $ do
+          summary <- liftIO $ STM.atomically $ do
             status <- STM.readTVar $
               fromMaybe (error "Attempted to lookup test by index outside bounds") $
                 IntMap.lookup i statusMap
@@ -86,6 +95,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
             let testCaseAttributes time = map (uncurry XML.Attr . first XML.unqual)
                   [ ("name", testName)
                   , ("time", showTime time)
+                  , ("classname", unwords groupNames)
                   ]
 
                 mkSummary contents =
@@ -120,7 +130,8 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
           Const summary <$ State.modify (+ 1)
 
         runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
-          Const soFar <- Functor.getCompose $ Tasty.getTraversal children
+          Const soFar <- Reader.withReaderT (++ [groupName]) $ Functor.getCompose $ Tasty.getTraversal children
+
           let grouped = appEndo (xmlRenderer soFar) $
                 XML.node (XML.unqual "testsuite") $
                   XML.Attr (XML.unqual "name") groupName
@@ -131,7 +142,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
       in do
         (Const summary, tests) <-
-          flip State.runStateT 0 $ Functor.getCompose $ Tasty.getTraversal $
+          flip State.runStateT 0 $ flip Reader.runReaderT [] $ Functor.getCompose $ Tasty.getTraversal $
            Tasty.foldTestTree
              Tasty.trivialFold { Tasty.foldSingle = runTest, Tasty.foldGroup = runGroup }
              options
