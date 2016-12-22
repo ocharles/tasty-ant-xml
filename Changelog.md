@@ -1,3 +1,7 @@
+# 1.0.4
+
+* We now use the `classname` attribute to indicate the test group a test came from. Thanks to @haishengwu-okta for this feature.
+
 # 1.0.3
 
 * Now creates the directory containing the report XML file. Thanks to @haishengwu-okta for this feature.
