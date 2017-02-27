@@ -25,8 +25,8 @@ library
     tagged >= 0.7,
     tasty >= 0.10 && < 0.12,
     transformers >= 0.3.0.0,
-    directory >= 1.2.6.2,
-    filepath >= 1.4.1.0,
+    directory >= 1.0.0,
+    filepath >= 1.0.0,
     xml >= 1.3.13
   default-language: Haskell98
   ghc-options: -Wall -O2
