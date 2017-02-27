@@ -1,3 +1,10 @@
+# 1.0.5
+
+## Other Changes
+
+* Reduce the lower bound of `filepath` to >= 1.0.0
+* Reduce the lower bound of `directory` to >= 1.0.0
+
 # 1.0.4
 
 * We now use the `classname` attribute to indicate the test group a test came from. Thanks to @haishengwu-okta for this feature.
