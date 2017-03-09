@@ -134,8 +134,11 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
           Const soFar <- Reader.local (groupName :) $ Functor.getCompose $ Tasty.getTraversal children
 
           let grouped = appEndo (xmlRenderer soFar) $
-                XML.node (XML.unqual "testsuite") $
-                  XML.Attr (XML.unqual "name") groupName
+                XML.node (XML.unqual "testsuite")
+                   [ XML.Attr (XML.unqual "name") groupName
+                   , XML.Attr (XML.unqual "tests")
+                       (show . getSum . (summaryFailures `mappend` summaryErrors `mappend` summarySuccesses) $ soFar)
+                   ]
 
           pure $ Const
             soFar { xmlRenderer = Endo (`appendChild` grouped)
