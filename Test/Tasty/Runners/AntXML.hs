@@ -13,6 +13,7 @@ import Numeric (showFFloat)
 import Control.Applicative
 import Control.Arrow (first)
 import Control.Monad.IO.Class (liftIO)
+import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Monoid(..), Endo(..), Sum(..))
 import Data.Proxy (Proxy(..))
@@ -95,7 +96,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
             let testCaseAttributes time = map (uncurry XML.Attr . first XML.unqual)
                   [ ("name", testName)
                   , ("time", showTime time)
-                  , ("classname", unwords groupNames)
+                  , ("classname", intercalate "." (reverse groupNames))
                   ]
 
                 mkSummary contents =
@@ -130,7 +131,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
           Const summary <$ State.modify (+ 1)
 
         runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
-          Const soFar <- Reader.withReaderT (++ [groupName]) $ Functor.getCompose $ Tasty.getTraversal children
+          Const soFar <- Reader.local (groupName :) $ Functor.getCompose $ Tasty.getTraversal children
 
           let grouped = appEndo (xmlRenderer soFar) $
                 XML.node (XML.unqual "testsuite") $
