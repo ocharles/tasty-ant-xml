@@ -1,3 +1,27 @@
+# 1.1.0
+
+## Breaking Changes
+
+* The XML generated is now slightly different in order to satisfy Jenkins. In
+  particular:
+
+  * The `classname` attribute now joins the test path with `.` (like a Java
+    class name).
+  * `testsuite` nodes have a `tests` attribute, which is the amount of tests
+    executed.
+
+  For more discussion see https://github.com/ocharles/tasty-ant-xml/pull/20 and
+  https://github.com/ocharles/tasty-ant-xml/commit/a01df06b59122c3086fc9f42854129b1d4a8c31c#commitcomment-21211275
+
+  Thanks to @liskin and @haishengwu-okta for this work.
+
+## Other Changes
+
+* Increase the lower bound of `directory` to >= 1.2.3.0. Earlier versions may
+  throw exceptions on some of the actions we are using. Thanks to @liskin for
+  pointing this out.
+
+
 # 1.0.5
 
 ## Other Changes
