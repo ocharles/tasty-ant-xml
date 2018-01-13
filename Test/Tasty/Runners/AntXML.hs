@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -55,7 +56,12 @@ data Summary = Summary { summaryFailures :: Sum Int
 
 instance Monoid Summary where
   mempty = memptydefault
+#if !MIN_VERSION_base(4,11,0)
   mappend = mappenddefault
+#else
+instance Semigroup Summary where
+  (<>) = mappenddefault
+#endif
 
 
 --------------------------------------------------------------------------------
