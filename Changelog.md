@@ -1,3 +1,10 @@
+# 1.1.2
+
+## Other Changes
+
+* Bump upper bound of `tasty`.
+
+
 # 1.1.1
 
 ## Other Changes
