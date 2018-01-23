@@ -16,14 +16,15 @@ import Control.Arrow (first)
 import Control.Monad.IO.Class (liftIO)
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
-import Data.Monoid (Monoid(..), Endo(..), Sum(..))
+import Data.Monoid ((<>), Monoid(..), Endo(..), Sum(..))
 import Data.Proxy (Proxy(..))
 import Data.Tagged (Tagged(..))
+import Data.Time.Clock (diffTimeToPicoseconds, utctDayTime, getCurrentTime)
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Generics.Deriving.Monoid (memptydefault, mappenddefault)
-import System.Directory (createDirectoryIfMissing, canonicalizePath)
-import System.FilePath (takeDirectory)
+import System.Directory (createDirectoryIfMissing, doesDirectoryExist, canonicalizePath)
+import System.FilePath (takeDirectory, (</>))
 
 import qualified Control.Concurrent.STM as STM
 import qualified Control.Monad.State as State
@@ -159,9 +160,9 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
              testTree
 
         return $ \elapsedTime -> do
-          createPathDirIfMissing path
-          writeFile path $
-            XML.showTopElement $
+          withOutputFile path $ \ file -> do
+            writeFile file $
+              XML.showTopElement $
               appEndo (xmlRenderer summary) $
                 XML.node
                   (XML.unqual "testsuites")
@@ -181,12 +182,23 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
   resultException r =
     case Tasty.resultOutcome r of
          Tasty.Failure (Tasty.TestThrewException e) -> Just e
-         _ -> Nothing
+         _                                          -> Nothing
 
   resultTimedOut r =
     case Tasty.resultOutcome r of
          Tasty.Failure (Tasty.TestTimedOut _) -> True
-         _ -> False
+         _                                    -> False
+
+  withOutputFile path act = do
+    isDir <- doesDirectoryExist path
+    (if isDir
+      then createUniqueFileNameIn path
+      else createPathDirIfMissing path) >>= act
+
+  createUniqueFileNameIn path = do
+    ns <- diffTimeToPicoseconds . utctDayTime <$> getCurrentTime
+    return $ path </> ("tasty-" <> show ns <> ".xml")
 
   createPathDirIfMissing path = fmap takeDirectory (canonicalizePath path)
                                 >>= createDirectoryIfMissing True
+                                >>  return path
