@@ -1,3 +1,13 @@
+# 1.1.6
+
+## Functionality Changes
+
+* The order of tests is now reversed from what was previously output (which was
+  itself reversed). This means that tests are now reported in the order they are
+  defined, as expected. Thanks to @feuerbach for this fix. See
+  https://github.com/ocharles/tasty-ant-xml/pull/28 for more information.
+
+
 # 1.1.5
 
 ## Other Changes
