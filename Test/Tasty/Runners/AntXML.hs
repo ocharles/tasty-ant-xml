@@ -51,7 +51,7 @@ instance Tasty.IsOption (Maybe AntXMLPath) where
 data Summary = Summary { summaryFailures :: Sum Int
                        , summaryErrors :: Sum Int
                        , summarySuccesses :: Sum Int
-                       , xmlRenderer :: Endo XML.Element
+                       , xmlRenderer :: Endo [XML.Element]
                        } deriving (Generic)
 
 instance Monoid Summary where
@@ -107,7 +107,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
                 mkSummary contents =
                   mempty { xmlRenderer = Endo
-                             (`appendChild` XML.node (XML.unqual "testcase") contents)
+                             (XML.node (XML.unqual "testcase") contents :)
                          }
 
                 mkSuccess time = (mkSummary (testCaseAttributes time)) { summarySuccesses = Sum 1 }
@@ -139,15 +139,17 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
         runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
           Const soFar <- Reader.local (groupName :) $ Functor.getCompose $ Tasty.getTraversal children
 
-          let grouped = appEndo (xmlRenderer soFar) $
+          let grouped =
                 XML.node (XML.unqual "testsuite")
-                   [ XML.Attr (XML.unqual "name") groupName
+                  ([ XML.Attr (XML.unqual "name") groupName
                    , XML.Attr (XML.unqual "tests")
                        (show . getSum . (summaryFailures `mappend` summaryErrors `mappend` summarySuccesses) $ soFar)
                    ]
+                  , appEndo (xmlRenderer soFar) []
+                  )
 
           pure $ Const
-            soFar { xmlRenderer = Endo (`appendChild` grouped)
+            soFar { xmlRenderer = Endo (grouped :)
                   }
 
       in do
@@ -162,21 +164,18 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
           createPathDirIfMissing path
           writeFile path $
             XML.showTopElement $
-              appEndo (xmlRenderer summary) $
-                XML.node
-                  (XML.unqual "testsuites")
-                  [ XML.Attr (XML.unqual "errors")
-                      (show . getSum . summaryErrors $ summary)
-                  , XML.Attr (XML.unqual "failures")
-                      (show . getSum . summaryFailures $ summary)
-                  , XML.Attr (XML.unqual "tests") (show tests)
-                  , XML.Attr (XML.unqual "time") (showTime elapsedTime)
-                  ]
+              XML.node
+                (XML.unqual "testsuites")
+                ([ XML.Attr (XML.unqual "errors")
+                     (show . getSum . summaryErrors $ summary)
+                 , XML.Attr (XML.unqual "failures")
+                     (show . getSum . summaryFailures $ summary)
+                 , XML.Attr (XML.unqual "tests") (show tests)
+                 , XML.Attr (XML.unqual "time") (showTime elapsedTime)
+                 ]
+                , appEndo (xmlRenderer summary) [])
 
           return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
-
-  appendChild parent child =
-    parent { XML.elContent = XML.elContent parent ++ [ XML.Elem child ] }
 
   resultException r =
     case Tasty.resultOutcome r of
