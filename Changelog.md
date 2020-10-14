@@ -1,3 +1,9 @@
+# 1.1.7
+
+## Other Changes
+
+* Bump upper bound of `tasty`.
+
 # 1.1.6
 
 ## Functionality Changes
