@@ -136,7 +136,7 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
           Const summary <$ State.modify (+ 1)
 
-        runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
+        runGroup _options groupName children = Tasty.Traversal $ Functor.Compose $ do
           Const soFar <- Reader.local (groupName :) $ Functor.getCompose $ Tasty.getTraversal children
 
           let grouped =
