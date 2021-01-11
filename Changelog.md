@@ -1,3 +1,10 @@
+# 1.1.8
+
+## Other Changes
+
+* Support `tasty-1.4`. Due to major API changes, 1.4 is now the minimum version
+  of `tasty` supported. Thanks to @jkachmar (PR #31).
+
 # 1.1.7
 
 ## Other Changes

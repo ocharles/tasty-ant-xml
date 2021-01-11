@@ -1,5 +1,5 @@
 name: tasty-ant-xml
-version: 1.1.7
+version: 1.1.8
 synopsis: Render tasty output to XML for Jenkins
 description: A tasty ingredient to output test results in XML, using the Ant schema. This XML can be consumed by the Jenkins continuous integration framework.
 homepage: http://github.com/ocharles/tasty-ant-xml
@@ -23,7 +23,7 @@ library
     mtl >= 2.1.2,
     stm >= 2.4.2,
     tagged >= 0.7,
-    tasty >= 0.10 && < 1.5,
+    tasty >= 1.4 && < 1.5,
     transformers >= 0.3.0.0,
     directory >= 1.2.3.0,
     filepath >= 1.0.0,
