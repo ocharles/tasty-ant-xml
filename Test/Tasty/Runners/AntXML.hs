@@ -13,6 +13,7 @@ module Test.Tasty.Runners.AntXML (antXMLRunner, AntXMLPath(..) ) where
 import Numeric (showFFloat)
 import Control.Applicative
 import Control.Arrow (first)
+import Control.Exception (displayException)
 import Control.Monad.IO.Class (liftIO)
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
@@ -28,8 +29,11 @@ import System.FilePath (takeDirectory)
 import qualified Control.Concurrent.STM as STM
 import qualified Control.Monad.State as State
 import qualified Control.Monad.Reader as Reader
+import qualified Data.Array as Array
 import qualified Data.Functor.Compose as Functor
 import qualified Data.IntMap as IntMap
+import qualified Text.Regex.Base as Regex
+import qualified Text.Regex.Posix.String as Regex
 import qualified Test.Tasty as Tasty
 import qualified Test.Tasty.Providers as Tasty
 import qualified Test.Tasty.Options as Tasty
@@ -123,11 +127,11 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
                 | Tasty.resultSuccessful result -> pure (mkSuccess (Tasty.resultTime result))
                 | otherwise ->
                     case resultException result of
-                      Just e  -> pure $ (mkFailure (Tasty.resultTime result) (show e)) { summaryErrors = Sum 1 }
+                      Just e  -> pure $ (mkFailure (Tasty.resultTime result) (dropConsoleFormatting $ displayException e)) { summaryErrors = Sum 1 }
                       Nothing -> pure $
                         if resultTimedOut result
                           then (mkFailure (Tasty.resultTime result) "TimeOut") { summaryErrors = Sum 1 }
-                          else (mkFailure (Tasty.resultTime result) (Tasty.resultDescription result))
+                          else (mkFailure (Tasty.resultTime result) (dropConsoleFormatting $ Tasty.resultDescription result))
                                { summaryFailures = Sum 1 }
 
               -- Otherwise the test has either not been started or is currently
@@ -176,6 +180,18 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
                 , appEndo (xmlRenderer summary) [])
 
           return (getSum ((summaryFailures `mappend` summaryErrors) summary) == 0)
+
+  -- Drops ANSI control characters which might be used to set colors.
+  -- Including these breaks XML, there is not much point encoding them.
+  dropConsoleFormatting input =
+    let regex = Regex.makeRegex "\x1b\\[[0-9;]*[mGKHF]" :: Regex.Regex
+        matches = Regex.matchAll regex input
+        dropMatch (offset, len) input' =
+          let (begining, rest) = splitAt offset input'
+              (_, end) = splitAt len rest
+          in begining <> end
+        matchTuples = map (Array.! 0) matches
+    in foldr dropMatch input matchTuples
 
   resultException r =
     case Tasty.resultOutcome r of
