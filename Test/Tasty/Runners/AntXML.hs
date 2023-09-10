@@ -14,6 +14,7 @@ import Numeric (showFFloat)
 import Control.Applicative
 import Control.Arrow (first)
 import Control.Monad.IO.Class (liftIO)
+import Data.Foldable (fold)
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Monoid(..), Endo(..), Sum(..))
@@ -136,7 +137,12 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
 
           Const summary <$ State.modify (+ 1)
 
-        runGroup _options groupName children = Tasty.Traversal $ Functor.Compose $ do
+        runGroup
+          :: Reader.MonadReader [String] f
+          => String
+          -> Tasty.Traversal (Functor.Compose f (Const Summary))
+          -> Tasty.Traversal (Functor.Compose f (Const Summary))
+        runGroup groupName children = Tasty.Traversal $ Functor.Compose $ do
           Const soFar <- Reader.local (groupName :) $ Functor.getCompose $ Tasty.getTraversal children
 
           let grouped =
@@ -152,11 +158,18 @@ antXMLRunner = Tasty.TestReporter optionDescription runner
             soFar { xmlRenderer = Endo (grouped :)
                   }
 
+        runGroup' _options groupName =
+#if MIN_VERSION_tasty(1, 5, 0)
+          runGroup groupName . fold
+#else
+          runGroup groupName
+#endif
+
       in do
         (Const summary, tests) <-
           flip State.runStateT 0 $ flip Reader.runReaderT [] $ Functor.getCompose $ Tasty.getTraversal $
            Tasty.foldTestTree
-             Tasty.trivialFold { Tasty.foldSingle = runTest, Tasty.foldGroup = runGroup }
+             Tasty.trivialFold { Tasty.foldSingle = runTest, Tasty.foldGroup = runGroup' }
              options
              testTree
 
