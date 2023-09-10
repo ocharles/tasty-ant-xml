@@ -1,0 +1,72 @@
+name: CI
+on:
+  - push
+  - pull_request
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  main:
+    name: GHC ${{ matrix.ghc }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc:
+          - "8.0"
+          - "8.2"
+          - "8.4"
+          - "8.6"
+          - "8.8"
+          - "8.10"
+          - "9.0"
+          - "9.2"
+          - "9.4"
+        haddock: [false]
+        include:
+        - os: ubuntu-latest
+          ghc: "9.6"
+          haddock: [true]
+        - os: macOS-latest
+          ghc: "9.6"
+          haddock: [false]
+        - os: windows-latest
+          ghc: "9.6"
+          haddock: [false]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: haskell/actions/setup@v2
+      id: setup-haskell-cabal
+      with:
+        ghc-version: ${{ matrix.ghc }}
+    - uses: actions/cache@v2
+      name: Cache cabal stuff
+      with:
+        path: |
+          ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
+          dist-newstyle
+        key: ${{ runner.os }}-${{ matrix.ghc }}
+    - name: Cabal version
+      run: |
+        cabal --version
+    - name: Unpack
+      run: |
+        cabal sdist --ignore-project --output-directory ..
+        cd ..
+        cabal get tasty-ant-xml-*.tar.gz
+    - name: Build
+      run: |
+        cd ../tasty-ant-xml-*/
+        cabal build all
+    - name: Haddock
+      if: ${{ matrix.haddock }}
+      run: |
+        cd ../tasty-ant-xml-*/
+        cabal haddock all
+    - name: Cabal check
+      run: |
+        cd ../tasty-ant-xml-*/
+        cabal check
