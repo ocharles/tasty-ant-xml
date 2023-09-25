@@ -1,3 +1,9 @@
+# 1.1.9
+
+## Other changes
+
+* Support `tasty-1.5`. Thanks to @sergv (PR #34).
+
 # 1.1.8
 
 ## Other Changes
